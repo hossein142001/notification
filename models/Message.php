@@ -6,7 +6,7 @@ use Yii;
 use yii\db\Exception;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
-
+use hiiran\api\v1\modules\user\models\User;
 /**
  * This is the model class for table "notification".
  *
@@ -20,7 +20,7 @@ use yii\helpers\Json;
  * @property string $update_at
  * @property string $create_at
  */
-class Message extends \yii\db\ActiveRecord
+class Message extends \hiiran\components\db\ActiveRecord
 {
     /**
      * @inheritdoc
@@ -36,11 +36,18 @@ class Message extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-          [['from_id', 'to_id'], 'integer'],
-          [['message', 'params'], 'string'],
-          [['update_at', 'create_at'], 'safe'],
-          [['title'], 'string', 'max' => 255],
-          [['event'], 'string', 'max' => 100],
+            [['from_id', 'to_id'], 'integer'],
+            [['message', 'params'], 'string'],
+            [['update_at', 'create_at'], 'safe'],
+            [['title'], 'string', 'max' => 255],
+            [['event'], 'string', 'max' => 100],
+
+            [['from_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['created_user_id' => 'id']],
+            [['to_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['updated_user_id' => 'id']],
+
+            [['created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['created_user_id' => 'id']],
+            [['updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['updated_user_id' => 'id']],
+            [['deleted_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['deleted_user_id' => 'id']],
         ];
     }
 
@@ -50,15 +57,15 @@ class Message extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-          'id' => 'ID',
-          'from_id' => 'From Id',
-          'to_id' => 'To Id',
-          'event' => 'Event name',
-          'title' => 'Title',
-          'message' => 'Message',
-          'params' => 'Json params',
-          'update_at' => 'Update At',
-          'create_at' => 'Create At',
+            'id' => 'ID',
+            'from_id' => 'From Id',
+            'to_id' => 'To Id',
+            'event' => 'Event name',
+            'title' => 'Title',
+            'message' => 'Message',
+            'params' => 'Json params',
+            'update_at' => 'Update At',
+            'create_at' => 'Create At',
         ];
     }
 
@@ -68,7 +75,7 @@ class Message extends \yii\db\ActiveRecord
      */
     public static function messages($where = [])
     {
-        if(!$where) {
+        if (!$where) {
             $where = ['or', 'to_id' => Yii::$app->user->identity->id, 'from_id' => Yii::$app->user->identity->id];
         }
 
@@ -78,7 +85,8 @@ class Message extends \yii\db\ActiveRecord
     /**
      * @param array $params
      */
-    public function setParams($params = []){
+    public function setParams($params = [])
+    {
         $params = ArrayHelper::merge($this->attributes, $params);
         $this->params = Json::encode($params);
     }
@@ -86,9 +94,10 @@ class Message extends \yii\db\ActiveRecord
     /**
      * @return array|mixed
      */
-    public function getParams(){
+    public function getParams()
+    {
         $params = Json::decode($this->getAttribute('params'));
-        if(!$params){
+        if (!$params) {
             $params = [];
         }
         return $params;
@@ -99,15 +108,16 @@ class Message extends \yii\db\ActiveRecord
      * @return array|mixed
      * @throws Exception
      */
-    public function __get($name) {
+    public function __get($name)
+    {
 
-        if($name == 'attributes'){
+        if ($name == 'attributes') {
             return $this->getAttributes();
         }
 
         // If name is model attribute
         $attributes = $this->attributes();
-        if(in_array($name, $attributes)){
+        if (in_array($name, $attributes)) {
             return parent::__get($name);
         }
 
@@ -119,5 +129,29 @@ class Message extends \yii\db\ActiveRecord
 
         throw new Exception();
 
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCreatedUser()
+    {
+        return $this->hasOne(User::className(), ['id' => 'created_user_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUpdatedUser()
+    {
+        return $this->hasOne(User::className(), ['id' => 'updated_user_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getDeletedUser()
+    {
+        return $this->hasOne(User::className(), ['id' => 'deleted_user_id']);
     }
 }
