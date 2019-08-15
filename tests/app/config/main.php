@@ -27,7 +27,7 @@ $config = [
     ],
     'modules' => [
 
-        // Notification by providers (Система нотификаций: email, sms, push, web, итд)
+        // Notification by providers (email, sms, push, web)
         'notification' => [
             'class' => 'hossein142001\notification\Module',
             'storeNotificationStatus' => true,

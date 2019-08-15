@@ -17,7 +17,7 @@
         "php":">=5.4.0",
         "yiisoft/yii2": ">=2.0",
         "yiisoft/yii2-redis": "~2.0.0",
-        "ladamalina/yii2-smsc": "@dev",
+        "hossein142001/yii2-sms": "*",
         "develandoo/yii2-push-notification": "^1.0"
     },
     "require-dev": {

@@ -64,10 +64,10 @@ use hossein142001\notification\components\Notification;
     
     $notification = new Notification([
       'from' => [\Yii::$app->params['supportEmail'] => \Yii::$app->name . ' robot'],
-      'to' => $deal['userSeller']['email'], // строка или массив
-      'toId' => $deal['userSeller']['id'], // строка или массив
-      'phone' => $deal['userSeller']['phone_number'], // строка или массив
-      'subject' => "\"{$deal['userBuyer']['nameForOut']}\" предлагает вам сделку для \"{$deal['ads']['product']->getName()}\"",
+      'to' => $deal['userSeller']['email'], // string or array
+      'toId' => $deal['userSeller']['id'], // string or array
+      'phone' => $deal['userSeller']['phone_number'], // string or array
+      'subject' => "\"{$deal['userBuyer']['nameForOut']}\" offers you a deal for \"{$deal['ads']['product']->getName()}\"",
       'token' => 'TOKEN',
       'content' => "",
       'params' => [
@@ -77,9 +77,9 @@ use hossein142001\notification\components\Notification;
       ],
       'view' => ['html' => 'Request-html', 'text' => 'Request-text'],
       'path' => '@common/mail/deal',
-      'notify' => ['growl', 'На Ваш email отправлено письмо для подтверждения'],
+      'notify' => ['growl', 'A confirmation email has been sent to your email'],
       'callback' => function(Provider $provider, $status){
-        // Тут можно обработать ответ от провайдеров нотификаций
+        // Here you can process the response from notification providers
       }
     ]);
            
@@ -95,11 +95,11 @@ use hossein142001\notification\components\Notification;
 $event = new Notification(['params' => [
   'from' => [\Yii::$app->params['supportEmail'] => \Yii::$app->name . ' robot'],
   'to' => $user->email,
-  'subject' => 'Регистрация на сайте ' . \Yii::$app->name,
+  'subject' => 'registration on the site ' . \Yii::$app->name,
   'emailView' => ['html' => 'signUp-html', 'text' => 'signUp-text'],
   'user' => $user,
   'phone' => $user->phone_number,
-  'notify' => ['growl', 'На Ваш email отправлено письмо для подтверждения'],
+  'notify' => ['growl', 'A confirmation email has been sent to your email'],
 ]]);
 Notification::trigger(self::className(),'Signup', $event);
 ```
@@ -109,10 +109,10 @@ or full
 ```php
 $notification = new Notification([
   'from' => [\Yii::$app->params['supportEmail'] => \Yii::$app->name . ' robot'],
-  'to' => $deal['userSeller']['email'], // строка или массив
-  'toId' => $deal['userSeller']['id'], // строка или массив
-  'phone' => $deal['userSeller']['phone_number'], // строка или массив
-  'subject' => "\"{$deal['userBuyer']['nameForOut']}\" предлагает вам сделку для \"{$deal['ads']['product']->getName()}\"",
+  'to' => $deal['userSeller']['email'], // string or array
+  'toId' => $deal['userSeller']['id'], // string or array
+  'phone' => $deal['userSeller']['phone_number'], // string or array
+  'subject' => "\"{$deal['userBuyer']['nameForOut']}\" offers you a deal for \"{$deal['ads']['product']->getName()}\"",
   'token' => 'TOKEN',
   'content' => "",
   'params' => [
@@ -122,9 +122,9 @@ $notification = new Notification([
   ],
   'view' => ['html' => 'Request-html', 'text' => 'Request-text'],
   'path' => '@common/mail/deal',
-  'notify' => ['growl', 'На Ваш email отправлено письмо для подтверждения'],
+  'notify' => ['growl', 'A confirmation email has been sent to your email'],
   'callback' => function(Provider $provider, $status){
-    // Тут можно обработать ответ от провайдеров нотификаций
+    // Here you can process the response from notification providers
   }
 ]);
 Notification::trigger(self::className(),'Request', $notification);
