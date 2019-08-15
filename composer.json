@@ -1,0 +1,34 @@
+{
+    "name": "hossein142001/yii2-notification",
+    "description": "Yii2 notification",
+    "license": "MIT",
+    "keywords": ["yii2", "eav", "attribute", "notification", "email", "sms"],
+    "type": "yii2-extension",
+    "authors": [
+        {
+            "name": "hossein142001",
+            "email": "hossein142001@gmail.com",
+            "homepage": "http://abatech.ir",
+            "role": "Developer"
+        }        
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php":">=5.4.0",
+        "yiisoft/yii2": ">=2.0",
+        "yiisoft/yii2-redis": "~2.0.0",
+        "ladamalina/yii2-smsc": "@dev",
+        "develandoo/yii2-push-notification": "^1.0"
+    },
+    "require-dev": {
+        "yiisoft/yii2-codeception": "*"
+    },
+    "suggest": {
+        "mirocow/yii2-queue": "to use Queue server"
+    },
+    "autoload": {
+        "psr-4": {
+            "hossein142001\\notification\\": "./"
+        }
+    }
+}
