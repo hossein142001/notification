@@ -2,11 +2,14 @@
 
 namespace hossein142001\notification\providers;
 
+use hiiran\api\v1\modules\user\models\User;
 use hossein142001\notification\components\Notification;
 use hossein142001\notification\components\Provider;
+use hossein142001\notification\models\Message;
 use Yii;
 use yii\base\Exception;
 use yii\base\InvalidConfigException;
+use yii\helpers\ArrayHelper;
 use yii\mail\MessageInterface;
 
 /**
@@ -38,7 +41,7 @@ class email extends Provider
      */
     public function send(Notification $notification)
     {
-        if(empty($notification->to)) return;
+        if (empty($notification->to) && empty($notification->toId)) return;
 
         $provider = 'mailer';
 
@@ -49,7 +52,7 @@ class email extends Provider
         /** @var \yii\swiftmailer\Mailer $mailer */
         $mailer = Yii::$app->get($provider);
 
-        if(!$mailer){
+        if (!$mailer) {
             throw new InvalidConfigException();
         }
 
@@ -67,7 +70,7 @@ class email extends Provider
         $mailer->viewPath = isset($notification->path) ? $notification->path : $this->emailViewPath;
 
         $params = array_merge($notification->params, [
-          'subject' => $notification->subject,
+            'subject' => $notification->subject,
         ]);
 
         // Registered variable
@@ -77,31 +80,27 @@ class email extends Provider
          * Layouts
          */
 
-        if(isset($notification->layouts['text'])){
+        if (isset($notification->layouts['text'])) {
             $mailer->textLayout = $notification->layouts['text'];
-        }
-        elseif(isset($this->layouts['text'])){
+        } elseif (isset($this->layouts['text'])) {
             $mailer->textLayout = $this->layouts['text'];
         }
 
-        if(isset($notification->layouts['html'])){
+        if (isset($notification->layouts['html'])) {
             $mailer->htmlLayout = $notification->layouts['html'];
-        }
-        elseif(isset($this->layouts['html'])){
+        } elseif (isset($this->layouts['html'])) {
             $mailer->htmlLayout = $this->layouts['html'];
         }
 
         /**
          * From
          */
-
-        if(!empty($notification->from)){
+        if (!empty($notification->from)) {
             $from = $notification->from;
-        }else {
+        } else {
             if (isset($this->config['from'])) {
                 $from = $this->config['from'];
-            }
-            else {
+            } else {
                 $from = isset(Yii::$app->params['adminEmail']) ? Yii::$app->params['adminEmail'] : 'admin@localhost';
             }
         }
@@ -109,17 +108,31 @@ class email extends Provider
         /**
          * To
          */
-
-        if (is_array($notification->to)) {
-            if(is_array(reset($notification->to))){
-                $emails = $notification->to;
+        if (!empty($notification->to)) {
+            if (is_array($notification->to)) {
+                if (is_array(reset($notification->to))) {
+                    $emails = $notification->to;
+                } else {
+                    // like [email => userName]
+                    $emails = [$notification->to];
+                }
             } else {
-                // like [email => userName]
                 $emails = [$notification->to];
             }
         }
-        else {
-            $emails = [$notification->to];
+
+        if (!empty($notification->toId)) {
+            if (is_array($notification->toId)) {
+                if (is_array(reset($notification->toId))) {
+                    foreach ($notification->toId AS $id)
+                        $emails[$id] = User::findOne($id)->email;
+                } else {
+                    // like [email => userName]
+                    $emails[$notification->toId] = User::findOne($notification->toId)->email;
+                }
+            } else {
+                $emails[$notification->toId] = User::findOne($notification->toId)->email;
+            }
         }
 
         /**
@@ -128,7 +141,8 @@ class email extends Provider
 
         $views = isset($notification->view) ? $notification->view : $this->views;
 
-        foreach ($emails as $email) {
+        foreach ($emails as $toId => $email) {
+
             $status = false;
             try {
 
@@ -140,7 +154,7 @@ class email extends Provider
                  * Reply-To
                  */
 
-                if($notification->replyTo){
+                if ($notification->replyTo) {
                     $message->setReplyTo($notification->replyTo);
                 }
 
@@ -148,11 +162,11 @@ class email extends Provider
                  * Body
                  */
 
-                if($notification->TextBody){
+                if ($notification->TextBody) {
                     $message->setTextBody($notification->TextBody);
                 }
 
-                if($notification->HtmlBody){
+                if ($notification->HtmlBody) {
                     $message->setHtmlBody($notification->HtmlBody);
                 }
 
@@ -160,7 +174,7 @@ class email extends Provider
                  * Attaches
                  */
 
-                if($notification->attaches){
+                if ($notification->attaches) {
                     foreach ($notification->attaches as $attach) {
                         $message->attach($attach);
                     }
@@ -176,7 +190,18 @@ class email extends Provider
                     ->setSubject($notification->subject)
                     ->send();
 
-            } catch (\Exception $e){
+                $providerName = $notification->data['providerName'];
+                $message_log = new Message();
+                $message_log->from_id = $notification->fromId;
+                $message_log->to_id = $toId;
+                $message_log->event = $notification->name;
+                $message_log->provider = $providerName;
+                $message_log->status_id = 51;
+                $message_log->title = $notification->subject;
+                $message_log->message = $notification->TextBody ?? $notification->HtmlBody;
+                $message_log->setParams(ArrayHelper::merge(['event' => $notification->name], $notification->params));
+                $message_log->save();
+            } catch (\Exception $e) {
                 $this->errors[] = $e->getMessage();
             }
 

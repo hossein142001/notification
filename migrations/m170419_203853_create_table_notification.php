@@ -14,6 +14,9 @@ class m170419_203853_create_table_notification extends Migration
             'to_id' => $this->bigInteger(),
             'title' => $this->string(255),
             'message' => $this->text(),
+            'event'=>$this->string(100),
+            'status_id' => $this->bigInteger()->notNull()->comment('وضعیت')->defaultValue(51),
+            'provider' => $this->string(),
             'params' => $this->text(),
             'created_at' => $this->timestamp()->defaultExpression('CURRENT_TIMESTAMP'),
             'created_user_id' => $this->bigInteger(),
@@ -25,6 +28,7 @@ class m170419_203853_create_table_notification extends Migration
 
         $this->addForeignKey('from_id_notification_fkey', '{{%notification}}', 'from_id', '{{%user}}', 'id');
         $this->addForeignKey('to_id_notification_fkey', '{{%notification}}', 'to_id', '{{%user}}', 'id');
+        $this->addForeignKey('status_id_notification_fkey', '{{%notification}}', 'status_id', '{{%domain}}', 'id');
 
         $this->addForeignKey('created_user_id_notification_fkey', '{{%notification}}', 'created_user_id', '{{%user}}', 'id');
         $this->addForeignKey('updated_user_id_notification_fkey', '{{%notification}}', 'updated_user_id', '{{%user}}', 'id');

@@ -2,11 +2,13 @@
 
 namespace hossein142001\notification\models;
 
+use hiiran\api\v1\modules\domain\models\Domain;
 use Yii;
 use yii\db\Exception;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 use hiiran\api\v1\modules\user\models\User;
+
 /**
  * This is the model class for table "notification".
  *
@@ -14,6 +16,8 @@ use hiiran\api\v1\modules\user\models\User;
  * @property integer $from_id
  * @property integer $to_id
  * @property string $event
+ * @property string $provider
+ * @property string $status_id
  * @property string $title
  * @property string $message
  * @property string $params
@@ -36,14 +40,14 @@ class Message extends \hiiran\components\db\ActiveRecord
     public function rules()
     {
         return [
-            [['from_id', 'to_id'], 'integer'],
-            [['message', 'params'], 'string'],
+            [['from_id', 'to_id', 'status_id'], 'integer'],
+            [['message', 'params', 'provider'], 'string'],
             [['update_at', 'create_at'], 'safe'],
-            [['title'], 'string', 'max' => 255],
+            [['title', 'provider'], 'string', 'max' => 255],
             [['event'], 'string', 'max' => 100],
 
-            [['from_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['created_user_id' => 'id']],
-            [['to_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['updated_user_id' => 'id']],
+            [['from_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['from_id' => 'id']],
+            [['to_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['to_id' => 'id']],
 
             [['created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['created_user_id' => 'id']],
             [['updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['updated_user_id' => 'id']],
@@ -61,6 +65,8 @@ class Message extends \hiiran\components\db\ActiveRecord
             'from_id' => 'From Id',
             'to_id' => 'To Id',
             'event' => 'Event name',
+            'provider' => 'provider',
+            'status_id' => 'status',
             'title' => 'Title',
             'message' => 'Message',
             'params' => 'Json params',
@@ -80,6 +86,14 @@ class Message extends \hiiran\components\db\ActiveRecord
         }
 
         return self::find()->where($where)->all();
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getStatus()
+    {
+        return $this->hasOne(Domain::className(), ['id' => 'status_id']);
     }
 
     /**
@@ -153,5 +167,21 @@ class Message extends \hiiran\components\db\ActiveRecord
     public function getDeletedUser()
     {
         return $this->hasOne(User::className(), ['id' => 'deleted_user_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getFrom()
+    {
+        return $this->hasOne(User::className(), ['id' => 'from_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getTo()
+    {
+        return $this->hasOne(User::className(), ['id' => 'to_id']);
     }
 }

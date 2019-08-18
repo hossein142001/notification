@@ -13,7 +13,7 @@ use yii\base\Exception;
 class Notification extends Event
 {
     /** @var int */
-    public $fromId = null;
+    public $fromId = 1;
 
     /** @var array */
     public $toId = [];
@@ -21,22 +21,22 @@ class Notification extends Event
     /** @var array */
     public $from = [];
 
-    /** @var array  */
+    /** @var array */
     public $to = [];
 
-    /** @var array  */
+    /** @var array */
     public $replyTo = [];
 
     /** @var array */
     public $phone = [];
 
-    /** @var array  */
+    /** @var array */
     public $token = [];
 
     /** @var string */
     public $subject = '';
 
-    /** @var string  */
+    /** @var string */
     public $notify = '';
 
     /** @var string */
@@ -54,10 +54,10 @@ class Notification extends Event
     /** @var array */
     public $view = [];
 
-    /** @var string  */
+    /** @var string */
     public $TextBody = '';
 
-    /** @var string  */
+    /** @var string */
     public $HtmlBody = '';
 
     /** @var array */
@@ -68,19 +68,19 @@ class Notification extends Event
 
     /** @var array */
     public $push = [
-      'aps' => [
-        'alert' => 'Hi',
-        'badge' => 1,
-        'sound' => 'default',
-        "link_url" => "https://google.com"
-      ],
+        'aps' => [
+            'alert' => 'Hi',
+            'badge' => 1,
+            'sound' => 'default',
+            "link_url" => "https://google.com"
+        ],
     ];
 
     public function __construct($config = [])
     {
         if (!empty($config)) {
             foreach ($config as $name => $value) {
-                if(property_exists($this, $name)) {
+                if (property_exists($this, $name)) {
                     $this->{$name} = $value;
                 }
             }
@@ -102,7 +102,7 @@ class Notification extends Event
             }
         }
 
-        if(!$this->notify){
+        if (!$this->notify) {
             $this->notify = ['growl', $this->subject];
         }
     }
